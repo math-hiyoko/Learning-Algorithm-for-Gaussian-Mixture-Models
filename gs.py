@@ -5,6 +5,9 @@ from scipy.stats import wishart
 from utils import *
 
 
+K = 4
+
+
 def get_z(gamma):
     N, K = gamma.shape
     identity = np.identity(K)
@@ -12,7 +15,7 @@ def get_z(gamma):
     return Z
 
 
-def gs(X, K, max_iter=1000, eps=1e-3):
+def gs(X, K, max_iter=500, eps=1e-2):
     N, Dim = X.shape
     mu, Lambda, pi = params_expect_init(K, Dim)
     alpha, beta, m, nu, W = params_latent_init(K, Dim)
@@ -44,29 +47,22 @@ def gs(X, K, max_iter=1000, eps=1e-3):
             break
         prev_ev = ev
 
-    return ev, gamma, [mu, Lambda, pi], [alpha, beta, m, nu, W]
+    Z = get_z(gamma)
+    return ev, Z, [mu, Lambda, pi], [alpha, beta, m, nu, W]
 
 
 def main():
     X = data_input()
-    best_ev = -1e+9
-    for k in range(2, 9):
-        print(f"\nRunning GS algorithm for K = {k}...")
-        start = time()
-        ev, gamma, params_expect, params_latent = gs(X, k)
-        stop = time()
-        print(f"GS algorithm for K = {k} finished in {stop - start:.3f} sec.")
-        print(f"log likelihood = {ev:5f}.")
-        if ev > best_ev:
-            best_k = k
-            best_ev = ev
-            best_gamma = gamma
-            best_params_expect = params_expect
-            best_params_latent = params_latent
+    print(f"\nRunning GS algorithm for K = {K}...")
+    start = time()
+    ev, Z, params_expect, params_latent = gs(X, K)
+    stop = time()
+    print(f"Finished in {stop - start:.3f} sec.")
+    print(f"log likelihood = {ev:5f}.")
 
-    print(f"\nBest cluster # is {best_k}.\nRecording its params...")
-    expect_data_output(best_ev, best_gamma, best_params_expect)
-    latent_data_output(best_params_latent)
+    print("Recording params...")
+    expect_data_output(ev, Z, params_expect)
+    latent_data_output(params_latent)
     print("Parameter recorded.\n")
     return
 

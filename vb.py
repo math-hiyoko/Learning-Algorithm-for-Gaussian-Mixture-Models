@@ -3,7 +3,10 @@ from time import time
 from utils import *
 
 
-def vb(X, K, max_iter=1000, eps=1e-3):
+K = 4
+
+
+def vb(X, K, max_iter=500, eps=1e-2):
     N, Dim = X.shape
     mu, Lambda, pi = params_expect_init(K, Dim)
     alpha, beta, m, nu, W = params_latent_init(K, Dim)
@@ -38,24 +41,16 @@ def vb(X, K, max_iter=1000, eps=1e-3):
 
 def main():
     X = data_input()
-    best_ev = -1e+9
-    for k in range(2, 9):
-        print(f"\nRunning VB algorithm for K = {k}...")
-        start = time()
-        ev, gamma, params_expect, params_latent = vb(X, k)
-        stop = time()
-        print(f"VB algorithm for K = {k} finished in {stop - start:.3f} sec.")
-        print(f"log likelihood = {ev:5f}.")
-        if ev > best_ev:
-            best_k = k
-            best_ev = ev
-            best_gamma = gamma
-            best_params_expect = params_expect
-            best_params_latent = params_latent
+    print(f"\nRunning VB algorithm for K = {K}...")
+    start = time()
+    ev, gamma, params_expect, params_latent = vb(X, K)
+    stop = time()
+    print(f"Finished in {stop - start:.3f} sec.")
+    print(f"log likelihood = {ev:5f}.")
 
-    print(f"\nBest cluster # is {best_k}.\nRecording its params...")
-    expect_data_output(best_ev, best_gamma, best_params_expect)
-    latent_data_output(best_params_latent)
+    print("Recording params...")
+    expect_data_output(ev, gamma, params_expect)
+    latent_data_output(params_latent)
     print("Parameter recorded.\n")
     return
 

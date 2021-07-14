@@ -3,7 +3,10 @@ from time import time
 from utils import *
 
 
-def em(X, K, max_iter=1000, eps=1e-3):
+K = 4
+
+
+def em(X, K, max_iter=500, eps=1e-2):
     N, Dim = X.shape
     mu, Lambda, pi = params_expect_init(K, Dim)
     pi_gauss = get_pi_gauss(X, [mu, Lambda, pi])
@@ -27,22 +30,15 @@ def em(X, K, max_iter=1000, eps=1e-3):
 
 def main():
     X = data_input()
-    best_ev = -1e+9
-    for k in range(2, 9):
-        print(f"\nRunning EM algorithm for K = {k}...")
-        start = time()
-        ev, gamma, params = em(X, k)
-        stop = time()
-        print(f"EM algorithm for K = {k} finished in {stop-start:.3f} sec.")
-        print(f"log likelihood = {ev:5f}.")
-        if ev > best_ev:
-            best_k = k
-            best_ev = ev
-            best_gamma = gamma
-            best_params = params
+    print(f"\nRunning EM algorithm for K = {K}...")
+    start = time()
+    ev, gamma, params = em(X, K)
+    stop = time()
+    print(f"Finished in {stop-start:.3f} sec.")
+    print(f"log likelihood = {ev:5f}.")
 
-    print(f"\nBest cluster # is {best_k}.\nRecording its params...")
-    expect_data_output(best_ev, best_gamma, best_params)
+    print("Recording params...")
+    expect_data_output(ev, gamma, params)
     print("Parameter recorded.\n")
     return
 
